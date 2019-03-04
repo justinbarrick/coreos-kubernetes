@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bootstrap-job
+  namespace: kube-system
+spec:
+  containers:
+  - name: bootstrap-job
+    image: alpine
+    command:
+    - /usr/bin/kubectl
+    - apply
+    - -f
+    - /manifests/
+    env:
+    - name: KUBECONFIG
+      value: /kubeconfig.yml
+    volumeMounts:
+    - mountPath: /manifests/
+      name: manifests
+    - mountPath: /usr/bin/kubectl
+      name: kubectl
+    - mountPath: /kubeconfig.yml
+      name: kubeconfig
+  volumes:
+  - name: manifests
+    hostPath:
+      path: /etc/kubernetes/bootstrap-manifests/
+  - name: kubectl
+    hostPath:
+      path: /opt/bin/kubectl
+  - name: kubeconfig
+    hostPath:
+      path: /etc/kubernetes/admin.conf
+  tolerations:
+  - effect: NoExecute
+    operator: Exists
+  - effect: NoSchedule
+    operator: Exists
+  restartPolicy: OnFailure
+  hostNetwork: true

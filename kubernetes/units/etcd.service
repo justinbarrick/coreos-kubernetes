@@ -1,0 +1,13 @@
+[Unit]
+Requires=coreos-metadata.service
+After=coreos-metadata.service
+
+[Service]
+EnvironmentFile=/run/metadata/coreos
+ExecStart=
+ExecStart=/usr/lib/coreos/etcd-wrapper $ETCD_OPTS \
+  --listen-peer-urls="http://$${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0}:2380" \
+  --listen-client-urls="http://0.0.0.0:2379" \
+  --initial-advertise-peer-urls="http://$${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0}:2380" \
+  --advertise-client-urls="http://$${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0}:2379" \
+  --discovery="${etcd_discovery_token}"
