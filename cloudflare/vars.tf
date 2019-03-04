@@ -11,3 +11,7 @@ variable "master_ips" {
 variable "master_ips_private" {
   type = "list"
 }
+
+variable "num_master_nodes" {
+  default = 3
+}

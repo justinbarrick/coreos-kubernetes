@@ -5,7 +5,7 @@ provider "cloudflare" {
 }
 
 resource "cloudflare_record" "etcd" {
-  count = "${len(var.master_ips_private)}"
+  count = "${var.num_master_nodes}"
 
   domain = "${var.cluster_domain}"
   name = "etcd-1"
@@ -16,7 +16,7 @@ resource "cloudflare_record" "etcd" {
 }
 
 resource "cloudflare_record" "k8s" {
-  count = "${len(var.master_ips)}"
+  count = "${var.num_master_nodes}"
 
   domain = "${var.cluster_domain}"
   name = "k8s-1"
