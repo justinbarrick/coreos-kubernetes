@@ -8,7 +8,7 @@ resource "cloudflare_record" "etcd" {
   count = "${var.num_master_nodes}"
 
   domain = "${var.cluster_domain}"
-  name = "etcd-1"
+  name = "etcd"
   value = "${element(var.master_ips_private, count.index)}"
 
   type = "A"
@@ -19,7 +19,7 @@ resource "cloudflare_record" "k8s" {
   count = "${var.num_master_nodes}"
 
   domain = "${var.cluster_domain}"
-  name = "k8s-1"
+  name = "k8s"
   value = "${element(var.master_ips, count.index)}"
 
   type = "A"

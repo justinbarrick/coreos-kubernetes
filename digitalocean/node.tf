@@ -15,6 +15,10 @@ resource "digitalocean_droplet" "master" {
   private_networking = true
 
   user_data = "${var.master_config}"
+
+  lifecycle {
+    ignore_changes = ["volume_ids"]
+  }
 }
 
 resource "digitalocean_droplet" "worker" {
@@ -30,6 +34,10 @@ resource "digitalocean_droplet" "worker" {
   private_networking = true
 
   user_data = "${var.worker_config}"
+
+  lifecycle {
+    ignore_changes = ["volume_ids"]
+  }
 }
 
 output "master-ips" {

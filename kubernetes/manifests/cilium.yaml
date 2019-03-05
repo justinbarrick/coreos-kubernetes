@@ -407,6 +407,9 @@ spec:
           name: clustermesh-secrets
           readOnly: true
       dnsPolicy: ClusterFirstWithHostNet
+      dnsConfig:
+        nameservers:
+        - 1.1.1.1
       hostNetwork: true
       hostPID: false
       initContainers:
