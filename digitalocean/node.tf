@@ -7,7 +7,7 @@ resource "digitalocean_droplet" "master" {
 
   image  = "coreos-stable"
   name   = "master-${count.index}"
-  region = "tor1"
+  region = "sfo2"
   size   = "s-2vcpu-2gb"
 
   ssh_keys = "${var.ssh_fingerprints}"
@@ -26,7 +26,7 @@ resource "digitalocean_droplet" "worker" {
 
   image  = "coreos-stable"
   name   = "worker-${count.index}"
-  region = "tor1"
+  region = "sfo2"
   size   = "s-2vcpu-2gb"
 
   ssh_keys = "${var.ssh_fingerprints}"

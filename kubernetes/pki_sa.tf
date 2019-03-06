@@ -1,6 +1,6 @@
 resource "tls_private_key" "sa" {
   algorithm   = "RSA"
-  rsa_bits    = "4096"
+  rsa_bits    = "2048"
 }
 
 data "tls_public_key" "sa" {

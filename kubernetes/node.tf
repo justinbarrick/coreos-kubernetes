@@ -21,6 +21,9 @@ locals {
     "${data.ignition_file.bootstrap_job.id}",
     "${data.ignition_file.cilium.id}",
     "${data.ignition_file.user_manifests.id}",
+    "${data.ignition_file.etcd_ca_cert.id}",
+    "${data.ignition_file.etcd_client_cert.id}",
+    "${data.ignition_file.etcd_client_key.id}",
   ]
 }
 
@@ -38,6 +41,8 @@ data "ignition_config" "master" {
     "${data.ignition_file.front_proxy_ca_key.id}",
     "${data.ignition_file.sa_key.id}",
     "${data.ignition_file.sa_pub.id}",
+    "${data.ignition_file.etcd_cert.id}",
+    "${data.ignition_file.etcd_key.id}",
     "${local.files}"
   ]
 }

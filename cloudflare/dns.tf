@@ -9,7 +9,7 @@ resource "cloudflare_record" "etcd" {
 
   domain = "${var.cluster_domain}"
   name = "etcd"
-  value = "${element(var.master_ips_private, count.index)}"
+  value = "${element(var.master_ips, count.index)}"
 
   type = "A"
   ttl = 1

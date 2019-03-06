@@ -11,14 +11,13 @@ module "kubernetes" {
 module "cloudflare" {
   source = "./cloudflare/"
 
-  cloudflare_email = "${data.vault_generic_secret.cloudflare.data["email"]}"
-  cloudflare_token = "${data.vault_generic_secret.cloudflare.data["token"]}"
-
   cluster_domain = "codesink.io"
   num_master_nodes = 3
 
+  cloudflare_email = "${data.vault_generic_secret.cloudflare.data["email"]}"
+  cloudflare_token = "${data.vault_generic_secret.cloudflare.data["token"]}"
+
   master_ips = "${module.digitalocean.master-ips}"
-  master_ips_private = "${module.digitalocean.master-ips-private}"
 }
 
 module "digitalocean" {
@@ -42,7 +41,7 @@ module "packet" {
   source = "./packet/"
 
   num_master_nodes = 0
-  num_worker_nodes = 2
+  num_worker_nodes = 0
 
   auth_token = "${data.vault_generic_secret.packet.data["token"]}"
   ssh_public_key = "${file("~/.ssh/id_rsa.pub")}"

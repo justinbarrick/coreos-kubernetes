@@ -10,18 +10,10 @@ data:
   etcd-config: |-
     ---
     endpoints:
-      - http://${etcd_hostname}:2379
-    #
-    # In case you want to use TLS in etcd, uncomment the 'ca-file' line
-    # and create a kubernetes secret by following the tutorial in
-    # https://cilium.link/etcd-config
-    # ca-file: '/var/lib/etcd-secrets/etcd-client-ca.crt'
-    #
-    # In case you want client to server authentication, uncomment the following
-    # lines and create a kubernetes secret by following the tutorial in
-    # https://cilium.link/etcd-config
-    # key-file: '/var/lib/etcd-secrets/etcd-client.key'
-    # cert-file: '/var/lib/etcd-secrets/etcd-client.crt'
+      - https://${etcd_hostname}:2379
+    ca-file: '/var/lib/etcd-secrets/ca.crt'
+    key-file: '/var/lib/etcd-secrets/client.key'
+    cert-file: '/var/lib/etcd-secrets/client.crt'
 
   # If you want to run cilium in debug mode change this value to true
   debug: "false"
@@ -484,11 +476,8 @@ spec:
         name: etcd-config-path
         # To read the k8s etcd secrets in case the user might want to use TLS
       - name: etcd-secrets
-        secret:
-          defaultMode: 420
-          optional: true
-          secretName: cilium-etcd-secrets
-        # To read the clustermesh configuration
+        hostPath:
+          path: /etc/kubernetes/pki/etcd/
       - name: clustermesh-secrets
         secret:
           defaultMode: 420
@@ -596,6 +585,9 @@ spec:
           name: etcd-secrets
           readOnly: true
       dnsPolicy: ClusterFirst
+      dnsConfig:
+        nameservers:
+        - 1.1.1.1
       priorityClassName: system-node-critical
       restartPolicy: Always
       serviceAccount: cilium-operator
@@ -611,10 +603,8 @@ spec:
         name: etcd-config-path
         # To read the k8s etcd secrets in case the user might want to use TLS
       - name: etcd-secrets
-        secret:
-          defaultMode: 420
-          optional: true
-          secretName: cilium-etcd-secrets
+        hostPath:
+          path: /etc/kubernetes/pki/etcd/
 ---
 apiVersion: v1
 kind: ServiceAccount
