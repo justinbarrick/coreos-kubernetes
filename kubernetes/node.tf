@@ -28,10 +28,11 @@ data "ignition_systemd_unit" "ansible-bootstrap" {
 [Unit]
 Requires=docker.service
 After=docker.service
+ConditionPathExists=!/etc/kubernetes/kubelet.conf
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/docker run --net=host -v /etc/ansible/ssh_key:/etc/ansible/ssh_key:ro --entrypoint ansible-runner justinbarrick/ansible-test -p /opt/ansible/playbook.yaml --inventory /etc/ansible/hosts run /tmp/private
+ExecStart=/usr/bin/docker run --restart=on-failure --net=host -v /etc/ansible/ssh_key:/etc/ansible/ssh_key:ro --entrypoint ansible-runner justinbarrick/ansible-test -p /opt/ansible/playbook.yaml --inventory /etc/ansible/hosts run /tmp/private
 
 [Install]
 WantedBy=multi-user.target

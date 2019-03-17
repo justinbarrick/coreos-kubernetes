@@ -69,3 +69,4 @@
     enabled: yes
     masked: no
     name: etcd-member
+    no_block: yes

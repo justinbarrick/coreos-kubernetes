@@ -15,5 +15,4 @@ RUN ansible-galaxy install defunctzombie.coreos-bootstrap
 COPY watches.yaml /opt/ansible/watches.yaml
 COPY hosts /etc/ansible/hosts
 COPY playbook.yaml /opt/ansible/playbook.yaml
-COPY roles/etcd /opt/ansible/roles/etcd
 COPY roles/kubernetes /opt/ansible/roles/kubernetes

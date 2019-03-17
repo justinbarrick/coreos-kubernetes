@@ -38,7 +38,10 @@ resource "digitalocean_droplet" "worker" {
   region = "sfo2"
   size   = "s-2vcpu-2gb"
 
-  ssh_keys = "${var.ssh_fingerprints}"
+  ssh_keys = [
+    "${var.ssh_fingerprints}",
+    "${digitalocean_ssh_key.ansible.*.id}"
+  ]
 
   private_networking = true
 

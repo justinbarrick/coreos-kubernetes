@@ -81,6 +81,7 @@
     enabled: yes
     masked: no
     name: kubelet
+    no_block: yes
 
 - name: kubeadm config
   template:
