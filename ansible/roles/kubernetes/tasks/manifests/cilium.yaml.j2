@@ -10,7 +10,7 @@ data:
   etcd-config: |-
     ---
     endpoints:
-      - https://{{ etcd_hostname }}:2379
+      - https://{{ ansible_local['node']['general']['etcd_hostname'] }}:2379
     ca-file: '/var/lib/etcd-secrets/ca.crt'
     key-file: '/var/lib/etcd-secrets/client.key'
     cert-file: '/var/lib/etcd-secrets/client.crt'

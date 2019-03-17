@@ -1,20 +1,24 @@
 ---
-- name: /tmp
-  file:
+- file:
     path: /etc/kubernetes/manifests
     state: directory
 
-- name: /tmp
-  file:
+- file:
     path: /etc/kubernetes/bootstrap-manifests
     state: directory
 
-- name:
-  copy:
-    src: bootstrap-pod.yaml
+- copy:
+    src: manifests/bootstrap-pod.yaml
     dest: /etc/kubernetes/manifests/bootstrap-pod.yaml
 
-- name:
-  template:
-    src: cilium.yaml.j2
+- template:
+    src: manifests/cilium.yaml.j2
     dest: /etc/kubernetes/bootstrap-manifests/cilium.yaml
+
+- copy:
+    src: manifests/ansible-operator.yaml
+    dest: /etc/kubernetes/bootstrap-manifests/ansible-operator.yaml
+
+- copy:
+    src: manifests/machineconfig.yaml
+    dest: /etc/kubernetes/bootstrap-manifests/machineconfig.yaml
