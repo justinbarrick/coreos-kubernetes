@@ -37,8 +37,8 @@ module "digitalocean" {
 
   digitalocean_token = "${data.vault_generic_secret.digitalocean.data["token"]}"
 
-  master_config = "${module.kubernetes.master-config}"
-  worker_config = "${module.kubernetes.worker-config}"
+  master_config = "${module.kubernetes.node-config}"
+  worker_config = "${module.kubernetes.node-config}"
 }
 
 module "packet" {
@@ -63,8 +63,8 @@ module "matchbox" {
   client_key = "${data.vault_generic_secret.matchbox.data["client_key"]}"
   ca_cert = "${data.vault_generic_secret.matchbox.data["ca_cert"]}"
 
-  master_config = "${module.kubernetes.master-config}"
-  worker_config = "${module.kubernetes.worker-config}"
+  master_config = "${module.kubernetes.node-config}"
+  worker_config = "${module.kubernetes.node-config}"
 }
 
 data "vault_generic_secret" "digitalocean" {

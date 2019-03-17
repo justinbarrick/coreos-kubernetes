@@ -17,12 +17,8 @@ output "ca_key_hash" {
   value = "${local.ca_key_hash}"
 }
 
-output "master-config" {
-  value = "${data.ignition_config.master.rendered}"
-}
-
-output "worker-config" {
-  value = "${data.ignition_config.worker.rendered}"
+output "node-config" {
+  value = "${data.ignition_config.node.rendered}"
 }
 
 output "ssh-public-key" {

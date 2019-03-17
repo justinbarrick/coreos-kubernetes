@@ -30,32 +30,18 @@ WantedBy=multi-user.target
 EOF
 }
 
-locals {
+data "ignition_config" "node" {
   systemd = [
     "${data.ignition_systemd_unit.ansible-bootstrap.id}"
   ]
 
   files = [
     "${data.ignition_file.metadata.id}",
-    "${data.ignition_file.resolv_conf.id}",
     "${data.ignition_file.etcd_ca_cert.id}",
     "${data.ignition_file.etcd_client_cert.id}",
     "${data.ignition_file.etcd_client_key.id}",
     "${data.ignition_file.ssh_key.id}",
-  ]
-}
-
-data "ignition_config" "master" {
-  systemd = ["${local.systemd}"]
-
-  files = [
     "${data.ignition_file.etcd_cert.id}",
-    "${data.ignition_file.etcd_key.id}",
-    "${local.files}"
+    "${data.ignition_file.etcd_key.id}"
   ]
-}
-
-data "ignition_config" "worker" {
-  systemd = ["${local.systemd}"]
-  files = ["${local.files}"]
 }
