@@ -1,12 +1,7 @@
-apiVersion: examples.codesink.io/v1alpha1
-kind: HelloWorld
+apiVersion: codesink.io/v1alpha1
+kind: MachineConfig
 metadata:
-  name: hello
+  name: default
 spec:
   kubernetes_version: v1.13.4
   crictl_version: v1.11.1
-  hashes:
-    crictl: ccf83574556793ceb01717dc91c66b70f183c60c2bbec70283939aae8fdef768
-    kubeadm: c4300d1f3ebccad48c8e267e45a736c7d227b0e45ef36582fa8dcfe2ef7b1b10
-    kubelet: c35cbce6f71344cb897a99b4b0d97e62ca7b249eddc23eca9741b9794227d92d
-    kubectl: 92de2edbc8c21cfce6f70daa48e95560274a7413a51a6f8c348d974490fd1338

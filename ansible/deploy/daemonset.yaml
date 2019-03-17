@@ -1,18 +1,18 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ansible-test
+  name: ansible
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: ansible-test
-  namespace: ansible-test
+  name: ansible
+  namespace: ansible
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: ansible-test
+  name: ansible
 rules:
 - apiGroups:
   - examples.codesink.io
@@ -24,34 +24,39 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: ansible-test
+  name: ansible
 subjects:
 - kind: ServiceAccount
-  name: ansible-test
-  namespace: ansible-test
+  name: ansible
+  namespace: ansible
 roleRef:
   kind: ClusterRole
-  name: ansible-test
+  name: ansible
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: ansible-test
-  namespace: ansible-test
+  name: ansible
+  namespace: ansible
 spec:
   selector:
     matchLabels:
-      name: ansible-test
+      name: ansible
   template:
     metadata:
       labels:
-        name: ansible-test
+        name: ansible
     spec:
       tolerations:
       - key: node-role.kubernetes.io/master
         effect: NoSchedule
-      serviceAccountName: ansible-test
+      - effect: NoSchedule
+        key: node.cloudprovider.kubernetes.io/uninitialized
+        value: "true"
+      - effect: NoSchedule
+        key: node.kubernetes.io/not-ready
+      serviceAccountName: ansible
       hostNetwork: true
       containers:
         - name: ansible
@@ -83,7 +88,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
-              value: "ansible-test"
+              value: "ansible"
             - name: ANSIBLE_PRIVATE_KEY_FILE
               value: /etc/ansible/ssh_key
       volumes:

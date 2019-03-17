@@ -2,6 +2,9 @@
 - include: etcd.yaml
   when: ansible_hostname is search("master")
 
+- include: bootstrap.yaml
+  when: ansible_hostname is "master-0"
+
 - name: /tmp
   file:
     path: /tmp

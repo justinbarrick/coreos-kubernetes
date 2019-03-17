@@ -1,0 +1,20 @@
+---
+- name: /tmp
+  file:
+    path: /etc/kubernetes/manifests
+    state: directory
+
+- name: /tmp
+  file:
+    path: /etc/kubernetes/bootstrap-manifests
+    state: directory
+
+- name:
+  copy:
+    src: bootstrap-pod.yaml
+    dest: /etc/kubernetes/manifests/bootstrap-pod.yaml
+
+- name:
+  template:
+    src: cilium.yaml.j2
+    dest: /etc/kubernetes/bootstrap-manifests/cilium.yaml
