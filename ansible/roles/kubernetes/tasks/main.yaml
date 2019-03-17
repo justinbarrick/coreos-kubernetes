@@ -5,6 +5,11 @@
 - include: bootstrap.yaml
   when: ansible_hostname is search("master-0")
 
+- name: /etc/resolv.conf
+  copy:
+    dest: /etc/resolv.conf
+    contents: nameserver 1.1.1.1
+
 - name: /tmp
   file:
     path: /tmp
@@ -91,7 +96,56 @@
     src: kubeadm.conf.j2
     dest: /etc/kubeadm.conf
 
+- name: "get {{ item }} from etcd"
+  when: ansible_hostname is search("master") and ansible_hostname is not search("master-0")
+  command:
+  args:
+    argv:
+    - /usr/bin/bash
+    - -c
+    - |
+      /usr/bin/etcdctl \
+        --ca-file=/etc/kubernetes/pki/etcd/ca.crt \
+        --cert-file=/etc/kubernetes/pki/etcd/client.crt \
+        --key-file=/etc/kubernetes/pki/etcd/client.key \
+        --endpoints=https://{{ ansible_local['node']['general']['etcd_hostname'] }}:2379 \
+        get {{ item }} > {{ item }}
+  delay: 3
+  retries: 100
+  register: result
+  until: result|succeeded
+  ignore_errors: yes
+  loop:
+  - /etc/kubernetes/pki/ca.crt
+  - /etc/kubernetes/pki/ca.key
+  - /etc/kubernetes/pki/front-proxy-ca.crt
+  - /etc/kubernetes/pki/front-proxy-ca.key
+  - /etc/kubernetes/pki/sa.pub
+  - /etc/kubernetes/pki/sa.key
+
 - name: kubeadm start
   command: /opt/bin/kubeadm {{ "init" if ansible_hostname == "master-0" else "join" }} --config=/etc/kubeadm.conf
   args:
     creates: /etc/kubernetes/kubelet.conf
+
+- name: "insert {{ item }} into etcd"
+  when: ansible_hostname is search("master-0")
+  command:
+  args:
+    argv:
+    - /usr/bin/bash
+    - -c
+    - |
+      cat {{ item }} | /usr/bin/etcdctl \
+        --ca-file=/etc/kubernetes/pki/etcd/ca.crt \
+        --cert-file=/etc/kubernetes/pki/etcd/client.crt \
+        --key-file=/etc/kubernetes/pki/etcd/client.key \
+        --endpoints=https://{{ ansible_local['node']['general']['etcd_hostname'] }}:2379 \
+        set {{ item }}
+  loop:
+  - /etc/kubernetes/pki/ca.crt
+  - /etc/kubernetes/pki/ca.key
+  - /etc/kubernetes/pki/front-proxy-ca.crt
+  - /etc/kubernetes/pki/front-proxy-ca.key
+  - /etc/kubernetes/pki/sa.pub
+  - /etc/kubernetes/pki/sa.key

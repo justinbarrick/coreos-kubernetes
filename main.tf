@@ -82,8 +82,3 @@ data "vault_generic_secret" "matchbox" {
 data "vault_generic_secret" "cloudflare" {
   path = "secret/data/cloudflare"
 }
-
-output "kubeconfig" {
-  value = "${module.kubernetes.kubeconfig}"
-  sensitive = true
-}

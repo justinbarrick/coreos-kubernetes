@@ -13,10 +13,6 @@ output "ca" {
   value = "${tls_self_signed_cert.ca.cert_pem}"
 }
 
-output "kubeconfig" {
-  value = "${local.kubeconfig}"
-}
-
 output "ca_key_hash" {
   value = "${local.ca_key_hash}"
 }

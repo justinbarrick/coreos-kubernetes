@@ -1,12 +1,3 @@
-data "ignition_file" "resolv_conf" {
-  filesystem = "root"
-  path = "/etc/resolv.conf"
-  mode = 420
-  content {
-    content = "nameserver 1.1.1.1"
-  }
-}
-
 resource "tls_private_key" "ssh_key" {
   algorithm   = "RSA"
   rsa_bits = "2048"
@@ -58,12 +49,6 @@ data "ignition_config" "master" {
   systemd = ["${local.systemd}"]
 
   files = [
-    "${data.ignition_file.ca_cert.id}",
-    "${data.ignition_file.ca_key.id}",
-    "${data.ignition_file.front_proxy_ca_cert.id}",
-    "${data.ignition_file.front_proxy_ca_key.id}",
-    "${data.ignition_file.sa_key.id}",
-    "${data.ignition_file.sa_pub.id}",
     "${data.ignition_file.etcd_cert.id}",
     "${data.ignition_file.etcd_key.id}",
     "${local.files}"
