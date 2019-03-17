@@ -9,18 +9,6 @@ variable "kubernetes_version" {
   default = "v1.13.4"
 }
 
-variable "user_manifests" {
-  default = ""
-}
-
-output "master-config" {
-  value = "${data.ignition_config.master.rendered}"
-}
-
-output "worker-config" {
-  value = "${data.ignition_config.worker.rendered}"
-}
-
 output "ca" {
   value = "${tls_self_signed_cert.ca.cert_pem}"
 }
@@ -31,4 +19,16 @@ output "kubeconfig" {
 
 output "ca_key_hash" {
   value = "${local.ca_key_hash}"
+}
+
+output "master-config" {
+  value = "${data.ignition_config.master.rendered}"
+}
+
+output "worker-config" {
+  value = "${data.ignition_config.worker.rendered}"
+}
+
+output "ssh-public-key" {
+  value = "${tls_private_key.ssh_key.public_key_openssh}"
 }

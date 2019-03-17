@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ansible-test
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ansible-test
+  namespace: ansible-test
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ansible-test
+rules:
+- apiGroups:
+  - examples.codesink.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ansible-test
+subjects:
+- kind: ServiceAccount
+  name: ansible-test
+  namespace: ansible-test
+roleRef:
+  kind: ClusterRole
+  name: ansible-test
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ansible-test
+  namespace: ansible-test
+spec:
+  selector:
+    matchLabels:
+      name: ansible-test
+  template:
+    metadata:
+      labels:
+        name: ansible-test
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      serviceAccountName: ansible-test
+      hostNetwork: true
+      containers:
+        - name: ansible
+          command:
+          - /usr/local/bin/ao-logs
+          - /tmp/ansible-operator/runner
+          - stdout
+          image: justinbarrick/ansible-test:latest
+          imagePullPolicy: Always
+          volumeMounts:
+          - mountPath: /tmp/ansible-operator/runner
+            name: runner
+            readOnly: true
+        - name: operator
+          image: justinbarrick/ansible-test:latest
+          imagePullPolicy: Always
+          volumeMounts:
+          - mountPath: /tmp/ansible-operator/runner
+            name: runner
+          - mountPath: /rootfs
+            name: rootfs
+          - mountPath: /etc/ansible/ssh_key
+            name: ansible-ssh
+          env:
+            - name: WATCH_NAMESPACE
+              value: ""
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "ansible-test"
+            - name: ANSIBLE_PRIVATE_KEY_FILE
+              value: /etc/ansible/ssh_key
+      volumes:
+        - name: runner
+          emptyDir: {}
+        - name: rootfs
+          hostPath:
+            path: /
+            type: Directory
+        - name: ansible-ssh
+          hostPath:
+            path: /etc/ansible/ssh_key
+            type: File

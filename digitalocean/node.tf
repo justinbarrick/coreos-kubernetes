@@ -2,6 +2,12 @@ provider "digitalocean" {
   token = "${var.digitalocean_token}"
 }
 
+resource "digitalocean_ssh_key" "ansible" {
+  count = 1
+  name       = "ansible-${count.index}"
+  public_key = "${element(var.ssh_public_keys, count.index)}"
+}
+
 resource "digitalocean_droplet" "master" {
   count = "${var.num_master_nodes}"
 
@@ -10,7 +16,10 @@ resource "digitalocean_droplet" "master" {
   region = "sfo2"
   size   = "s-2vcpu-2gb"
 
-  ssh_keys = "${var.ssh_fingerprints}"
+  ssh_keys = [
+    "${var.ssh_fingerprints}",
+    "${digitalocean_ssh_key.ansible.*.id}"
+  ]
 
   private_networking = true
 

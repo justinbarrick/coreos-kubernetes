@@ -1,0 +1,71 @@
+---
+- name: /etc/systemd/system/etcd-member.service.d
+  file:
+    path: /etc/systemd/system/etcd-member.service.d
+    state: directory
+
+- name: 20-etcd-member.conf
+  copy:
+    dest: /etc/systemd/system/etcd-member.service.d/20-etcd-member.conf
+    content: |
+      [Unit]
+      Requires=coreos-metadata.service
+      After=coreos-metadata.service
+
+      [Service]
+      EnvironmentFile=/run/metadata/coreos
+      Environment=RKT_RUN_ARGS="--volume pki,kind=host,source=/etc/kubernetes/pki/etcd/,readOnly=true --mount volume=pki,target=/etc/kubernetes/pki/etcd/" 
+      ExecStart=
+      ExecStart=/usr/lib/coreos/etcd-wrapper $ETCD_OPTS \
+        --listen-peer-urls="https://${COREOS_DIGITALOCEAN_IPV4_PUBLIC_0}:2380" \
+        --listen-client-urls="https://0.0.0.0:2379" \
+        --initial-advertise-peer-urls="https://${COREOS_DIGITALOCEAN_IPV4_PUBLIC_0}:2380" \
+        --advertise-client-urls="https://${COREOS_DIGITALOCEAN_IPV4_PUBLIC_0}:2379" \
+        --discovery="{{ ansible_local['node']['general']['etcd_discovery_token'] }}" \
+        --trusted-ca-file="/etc/kubernetes/pki/etcd/ca.crt" \
+        --cert-file="/etc/kubernetes/pki/etcd/server.crt" \
+        --key-file="/etc/kubernetes/pki/etcd/server.key" \
+        --client-cert-auth=true \
+        --peer-client-cert-auth=true \
+        --peer-auto-tls=true
+
+- name: etcd-member.service
+  copy:
+    dest: /usr/lib/systemd/system/etcd-member.service
+    content: |
+      [Unit]
+      Description=etcd (System Application Container)
+      Documentation=https://github.com/coreos/etcd
+      Wants=network-online.target network.target
+      After=network-online.target
+      Conflicts=etcd.service
+      Conflicts=etcd2.service
+
+      [Service]
+      Type=notify
+      Restart=on-failure
+      RestartSec=10s
+      TimeoutStartSec=0
+      LimitNOFILE=40000
+
+      Environment="ETCD_IMAGE_TAG=v3.3.12"
+      Environment="ETCD_NAME=%m"
+      Environment="ETCD_USER=etcd"
+      Environment="ETCD_DATA_DIR=/var/lib/etcd"
+      Environment="RKT_RUN_ARGS=--uuid-file-save=/var/lib/coreos/etcd-member-wrapper.uuid"
+
+      ExecStartPre=/usr/bin/mkdir --parents /var/lib/coreos
+      ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/lib/coreos/etcd-member-wrapper.uuid
+      ExecStart=/usr/lib/coreos/etcd-wrapper $ETCD_OPTS
+      ExecStop=-/usr/bin/rkt stop --uuid-file=/var/lib/coreos/etcd-member-wrapper.uuid
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: start etcd-member
+  systemd:
+    state: started
+    daemon_reload: yes
+    enabled: yes
+    masked: no
+    name: etcd-member

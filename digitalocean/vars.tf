@@ -12,6 +12,12 @@ variable "ssh_fingerprints" {
   type = "list"
 }
 
+variable "ssh_public_keys" {
+  default = []
+
+  type = "list"
+}
+
 variable "digitalocean_token" {}
 
 variable "worker_config" {}

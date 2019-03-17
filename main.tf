@@ -26,6 +26,10 @@ module "digitalocean" {
   num_master_nodes = 3
   num_worker_nodes = 5
 
+  ssh_public_keys = [
+    "${module.kubernetes.ssh-public-key}"
+  ]
+
   ssh_fingerprints = [
     "2b:07:2e:3e:13:13:c0:9a:c7:4f:71:0e:81:01:a4:4d",
     "c9:eb:65:63:44:bc:ca:85:50:c0:6f:88:6a:03:1e:55"

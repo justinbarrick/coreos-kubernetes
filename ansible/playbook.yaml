@@ -1,0 +1,7 @@
+- hosts: kubernetes
+  gather_facts: False
+  roles:
+    - defunctzombie.coreos-bootstrap
+- hosts: kubernetes
+  roles:
+    - kubernetes

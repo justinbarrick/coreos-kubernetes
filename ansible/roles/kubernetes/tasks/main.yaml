@@ -1,0 +1,93 @@
+---
+- include: etcd.yaml
+  when: ansible_hostname is search("master")
+
+- name: /tmp
+  file:
+    path: /tmp
+    state: directory
+
+- name: /opt/bin
+  file:
+    path: /opt/bin/
+    state: directory
+
+- name: crictl
+  get_url:
+    url:  "https://github.com/kubernetes-incubator/cri-tools/releases/download/{{ crictl_version }}/crictl-{{ crictl_version }}-linux-amd64.tar.gz"
+    dest: /tmp/crictl.tar.gz
+    checksum: "sha256:{{ hashes.crictl }}"
+
+- name: extract_crictl
+  unarchive:
+    src: /tmp/crictl.tar.gz
+    dest: /opt/bin/
+    remote_src: yes
+
+- name: "{{ item }}"
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubernetes_version }}/bin/linux/amd64/{{ item }}"
+    dest: "/opt/bin/{{ item }}"
+    checksum: "sha256:{{ hashes[item] }}"
+    mode: 0755
+  loop:
+  - kubelet
+  - kubeadm
+  - kubectl
+
+- name: /etc/systemd/system/kubelet.service.d
+  file:
+    path: /etc/systemd/system/kubelet.service.d
+    state: directory
+
+- name: kubelet.service
+  copy:
+    dest: /etc/systemd/system/kubelet.service
+    content: |
+      [Unit]
+      Description=kubelet: The Kubernetes Node Agent
+      Documentation=http://kubernetes.io/docs/
+
+      [Service]
+      ExecStart=/opt/bin/kubelet
+      Restart=always
+      StartLimitInterval=0
+      RestartSec=10
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: 10-kubeadm.conf
+  copy:
+    dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    content: |
+      [Unit]
+      Requires=coreos-metadata.service
+      After=coreos-metadata.service
+
+      [Service]
+      EnvironmentFile=/run/metadata/coreos
+      Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"
+      Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
+      EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
+      EnvironmentFile=-/etc/default/kubelet
+      ExecStart=
+      ExecStart=/opt/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS --node-ip=${COREOS_DIGITALOCEAN_IPV4_PUBLIC_0} --cloud-provider=external
+
+- name: start kubelet
+  systemd:
+    state: started
+    daemon_reload: yes
+    enabled: yes
+    masked: no
+    name: kubelet
+
+- name: kubeadm config
+  template:
+    src: kubeadm.conf.j2
+    dest: /etc/kubeadm.conf
+
+- name: kubeadm start
+  command: /opt/bin/kubeadm {{ "init" if ansible_hostname == "master-0" else "join" }} --config=/etc/kubeadm.conf
+  args:
+    creates: /etc/kubernetes/kubelet.conf

@@ -1,0 +1,8 @@
+[kubernetes]
+localhost
+
+[kubernetes:vars]
+ansible_ssh_user=core
+ansible_python_interpreter="/root/bin/python"
+ansible_become=yes
+ansible_become_user=root
